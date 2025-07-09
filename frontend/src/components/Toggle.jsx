@@ -4,17 +4,16 @@ import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-export default function VerticalToggleButtons() {
-  const [view, setView] = React.useState('list');
+export default function VerticalToggleButtons({ viewMode, setViewMode }) {
 
   const handleChange = (event, nextView) => {
-    setView(nextView);
+    if (nextView != null) setViewMode(nextView);
   };
 
   return (
     <ToggleButtonGroup
       orientation="horizontal"
-      value={view}
+      value={viewMode}
       exclusive
       onChange={handleChange}
     >

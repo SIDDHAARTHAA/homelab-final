@@ -7,31 +7,48 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SortIcon from '@mui/icons-material/Sort';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import DownloadIcon from '@mui/icons-material/Download';
-import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@mui/material/styles';
+import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
+import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
+import FolderZipRoundedIcon from '@mui/icons-material/FolderZipRounded';
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 
-function createData(name, dateModified, size) {
-  return { name, dateModified, size };
+import { useTheme } from '@mui/material/styles';
+import FileOptionsMenu from './FileOptionsMenu';
+import axios from 'axios';
+
+// Helper to get file extension
+function getExtension(name) {
+  return name.split('.').pop().toLowerCase();
 }
 
-const rows = [
-  createData('File A', '2025-07-01', '2.3 MB'),
-  createData('File B', '2025-06-20', '1.1 MB'),
-  createData('File C', '2025-05-10', '4.5 MB'),
-];
+// Helper to determine file type for icon/thumbnail
+function getFileType(file) {
+  if (file.type === "folder") return "folder";
+  const ext = getExtension(file.name);
+  if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)) return "image";
+  if (["mp4", "webm", "ogg", "mov", "avi", "mkv"].includes(ext)) return "video";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) return "archive";
+  if (["pdf", "txt", "md", "doc", "docx", "rtf"].includes(ext)) return "text";
+  return "other";
+}
 
-export default function FileTable() {
+export default function FileTable({ refreshKey }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [menuIndex, setMenuIndex] = React.useState(null);
   const [sortAnchor, setSortAnchor] = React.useState(null);
+  const [files, setFiles] = React.useState([]);
+
   const openMenu = Boolean(anchorEl);
   const openSort = Boolean(sortAnchor);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  React.useEffect(() => {
+    axios.get("http://localhost:3000/list?path=")
+      .then(res => setFiles(res.data))
+      .catch(err => console.error("Failed to fetch list:", err));
+  }, [refreshKey]);
 
   const handleMenuClick = (e, index) => {
     setAnchorEl(e.currentTarget);
@@ -39,12 +56,21 @@ export default function FileTable() {
   };
 
   const handleSortClick = (e) => setSortAnchor(e.currentTarget);
-
   const handleClose = () => {
     setAnchorEl(null);
     setMenuIndex(null);
     setSortAnchor(null);
   };
+
+  // Icon logic
+  function getIcon(file) {
+    const type = getFileType(file);
+    if (type === "folder") return <FolderRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
+    if (type === "image") return <ImageRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
+    if (type === "archive") return <FolderZipRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
+    if (type === "text") return <ArticleRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
+    return <ArticleRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
+  }
 
   return (
     <TableContainer component={Paper}>
@@ -74,52 +100,41 @@ export default function FileTable() {
                 <MenuItem disabled>Sort direction</MenuItem>
                 <MenuItem onClick={handleClose}>A to Z</MenuItem>
                 <MenuItem onClick={handleClose}>Z to A</MenuItem>
-                <Divider />
-                <MenuItem disabled>Folders</MenuItem>
-                <MenuItem onClick={handleClose}>On top</MenuItem>
-                <MenuItem onClick={handleClose}>Mixed with files</MenuItem>
               </Menu>
             </TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {rows.map((row, index) => (
+          {files.map((file, index) => (
             <TableRow key={index}>
-              <TableCell>{row.name}</TableCell>
-              {!isMobile && <TableCell>{row.dateModified}</TableCell>}
-              <TableCell>{row.size}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  {getIcon(file)}
+                  <span>{file.name}</span>
+                </div>
+              </TableCell>
+
+              {!isMobile && (
+                <TableCell>
+                  {new Date(file.modifiedAt).toLocaleDateString()}
+                </TableCell>
+              )}
+
+              <TableCell>
+                {file.type === "folder" ? "-" : formatSize(file.size)}
+              </TableCell>
+
               <TableCell align="right">
                 <IconButton onClick={(e) => handleMenuClick(e, index)}>
                   <MoreVertIcon />
                 </IconButton>
-
                 {menuIndex === index && (
-                  <Menu
+                  <FileOptionsMenu
                     anchorEl={anchorEl}
                     open={openMenu}
                     onClose={handleClose}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                  >
-                    <MenuItem onClick={handleClose}>
-                      <DownloadIcon fontSize="small" sx={{ mr: 1 }} />
-                      Download
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                      <DriveFileRenameOutlineIcon fontSize="small" sx={{ mr: 1 }} />
-                      Rename
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                      <InfoIcon fontSize="small" sx={{ mr: 1 }} />
-                      Folder Information
-                    </MenuItem>
-                    <Divider />
-                    <MenuItem onClick={handleClose} sx={{ color: 'red' }}>
-                      <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                      Delete
-                    </MenuItem>
-                  </Menu>
+                  />
                 )}
               </TableCell>
             </TableRow>
@@ -128,4 +143,11 @@ export default function FileTable() {
       </Table>
     </TableContainer>
   );
+}
+
+function formatSize(bytes) {
+  if (!bytes) return "-";
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
 }

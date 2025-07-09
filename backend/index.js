@@ -38,9 +38,6 @@ console.log(MAX_STORAGE);
 //list files end point
 app.get('/list', async (req, res) => {
     const relPath = req.query.path || "";
-    if (!relPath) return res.status(400).json({
-        error: "Invalid path"
-    })
     const sortBy = req.query.sortBy;
     const absPath = path.join(BasefolderPath, relPath);
 
