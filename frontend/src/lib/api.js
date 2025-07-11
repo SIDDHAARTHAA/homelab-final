@@ -1,0 +1,26 @@
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export async function listFiles(relPath) {
+    const res = await axios.get(`${API_URL}/list?path=${encodeURIComponent(relPath)}`);
+    console.log(relPath);
+    return res.data;
+}
+
+export async function createFolder(relPath, name) {
+    const res = await axios.post(`${API_URL}/mkdir`, { relPath, name });
+    return res.data;
+}
+
+export async function uploadFiles(relPath, files) {
+    const formData = new FormData();
+    formData.append("currentPath", relPath); // append first!
+    for (let file of files) {
+        formData.append("files", file);
+    }
+    const res = await axios.post(`${API_URL}/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+}

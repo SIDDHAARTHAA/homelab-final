@@ -2,15 +2,17 @@ import CreateNewFolderRoundedIcon from '@mui/icons-material/CreateNewFolderRound
 import VerticalToggleButtons from './Toggle';
 import { useEffect, useRef, useState } from 'react';
 import Popup from './PopUp';
-import axios from 'axios';
+import usePathStore from '../store/usePathStore.js'
+import { createFolder } from '@/lib/api';
 
-export default function CreateNewFolder({ viewMode, setViewMode, relPath = "" , onFolderCreated }) {
+export default function CreateNewFolder({ viewMode, setViewMode, onFolderCreated }) {
     const [createFolderPopup, setCreateFolderPopup] = useState(false);
     const [input, setInput] = useState("Untitled folder");
     const [firstType, setFirstType] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const inputRef = useRef(null);
+    const relPath = usePathStore(state => state.relPath);
 
     useEffect(() => {
         if (createFolderPopup && inputRef.current) {
@@ -43,12 +45,10 @@ export default function CreateNewFolder({ viewMode, setViewMode, relPath = "" , 
         setLoading(true);
         setError("");
         try {
-            await axios.post("http://localhost:3000/mkdir", {
-                relPath,
-                name,
-            });
+            await createFolder(relPath, name);
             setCreateFolderPopup(false);
-            if (onFolderCreated) onFolderCreated(); // trigger refresh if provided
+            if (onFolderCreated) onFolderCreated(); // This triggers the refresh in parent
+            // console.log(relPath)
         } catch (error) {
             setError(error.response?.data?.error || "Failed to create folder");
         } finally {

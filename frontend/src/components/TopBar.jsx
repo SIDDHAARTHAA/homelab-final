@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import axios from 'axios';
+import usePathStore from '../store/usePathStore.js'
+import { uploadFiles } from '@/lib/api';
 
 function TopBar({ onUpload }) {
     const fileInputRef = useRef();
@@ -16,18 +17,11 @@ function TopBar({ onUpload }) {
             alert("Max 100 files allowed!");
             return;
         }
-
-        const formData = new FormData();
-        for (let file of files) {
-            formData.append("files", file);
-        }
-
+        const relPath = usePathStore.getState().relPath;
         try {
-            const res = await axios.post("http://localhost:3000/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            alert(res.data.message + "\nUsed: " + res.data.used + " bytes");
+            const res = await uploadFiles(relPath, files);
+            console.log(relPath)
+            alert(res.message + "\nUsed: " + res.used + " bytes");
             if (onUpload) onUpload(); // trigger refresh
         } catch (err) {
             alert(err.response?.data?.error || "Upload failed!");

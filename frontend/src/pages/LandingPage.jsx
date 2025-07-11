@@ -9,11 +9,14 @@ function LandingPage() {
     const [viewMode, setViewMode] = useState("list");
     const [refreshKey, setRefreshKey] = useState(0);
 
+    // This function will be passed to children to trigger a refresh
+    const triggerRefresh = () => setRefreshKey(k => k + 1);
+
     return (
         <div className="flex justify-center  w-full sm:w-3/4 mx-auto border p-4 flex-col gap-y-5">
-            <TopBar onUpload={() => setRefreshKey(k => k + 1)} />
+            <TopBar onUpload={triggerRefresh} />
             <CondensedWithMenu />
-            <CreateNewFolder viewMode={viewMode} setViewMode={setViewMode} />
+            <CreateNewFolder viewMode={viewMode} setViewMode={setViewMode} onFolderCreated={triggerRefresh} />
             {viewMode == "list"
                 ? <ListLayout refreshKey={refreshKey} />
                 : <GridLayout refreshKey={refreshKey} />}

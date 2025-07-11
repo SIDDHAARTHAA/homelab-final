@@ -7,6 +7,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import IconButton from '@mui/material/IconButton';
 import FileOptionsMenu from './FileOptionsMenu';
 import Tooltip from '@mui/material/Tooltip';
+import usePathStore from '../store/usePathStore.js';
 
 // Helper to get file extension
 function getExtension(name) {
@@ -27,6 +28,8 @@ function getFileType(file) {
 export default function Grid({ file }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
+  const setRelPath = usePathStore(state => state.setRelPath);
+  const relPath = usePathStore(state => state.relPath);
 
   const handleMenuClick = (e) => {
     e.stopPropagation();
@@ -96,8 +99,20 @@ export default function Grid({ file }) {
     smallIcon = <ArticleRoundedIcon sx={{ fontSize: 20, color: "#1E88E5" }} />;
   }
 
+  // Add this handler:
+  const handleCardClick = () => {
+    if (file.type === "folder") {
+      // Enter the folder by updating relPath
+      setRelPath(relPath ? `${relPath}/${file.name}` : file.name);
+    }
+  };
+
   return (
-    <div className="bg-[#f1f4f8] w-52 rounded-xl p-2 shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer flex flex-col" style={{ height: 220, padding: 8 }}>
+    <div
+      className="bg-[#f1f4f8] w-52 rounded-xl p-2 shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer flex flex-col"
+      style={{ height: 220, padding: 8 }}
+      onClick={handleCardClick}
+    >
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2 overflow-hidden w-40">
           {smallIcon}

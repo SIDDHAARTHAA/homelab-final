@@ -1,4 +1,6 @@
 import * as React from 'react';
+import usePathStore from '../store/usePathStore.js';
+import { listFiles } from '@/lib/api';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   IconButton, Menu, MenuItem, Divider, useMediaQuery
@@ -37,6 +39,8 @@ export default function FileTable({ refreshKey }) {
   const [menuIndex, setMenuIndex] = React.useState(null);
   const [sortAnchor, setSortAnchor] = React.useState(null);
   const [files, setFiles] = React.useState([]);
+  const relPath = usePathStore(state => state.relPath);
+  const setRelPath = usePathStore(state => state.setRelPath);
 
   const openMenu = Boolean(anchorEl);
   const openSort = Boolean(sortAnchor);
@@ -45,10 +49,10 @@ export default function FileTable({ refreshKey }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   React.useEffect(() => {
-    axios.get("http://localhost:3000/list?path=")
-      .then(res => setFiles(res.data))
+    listFiles(relPath)
+      .then(setFiles)
       .catch(err => console.error("Failed to fetch list:", err));
-  }, [refreshKey]);
+  }, [refreshKey, relPath]);
 
   const handleMenuClick = (e, index) => {
     setAnchorEl(e.currentTarget);
@@ -107,7 +111,16 @@ export default function FileTable({ refreshKey }) {
 
         <TableBody>
           {files.map((file, index) => (
-            <TableRow key={index}>
+            <TableRow
+              key={index}
+              hover
+              style={{ cursor: file.type === "folder" ? "pointer" : "default" }}
+              onClick={() => {
+                if (file.type === "folder") {
+                  setRelPath(relPath ? `${relPath}/${file.name}` : file.name);
+                }
+              }}
+            >
               <TableCell>
                 <div className="flex items-center gap-2">
                   {getIcon(file)}

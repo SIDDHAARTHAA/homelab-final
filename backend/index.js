@@ -72,7 +72,11 @@ app.get('/list', async (req, res) => {
         } else {
             sorted = detailedEntries; // Unknown sort = raw list
         }
-
+        try {
+            console.log(relPath,absPath);
+        } catch (error) {
+            console.log(error.message)
+        }
         res.json(sorted);
 
     } catch (error) {
@@ -176,9 +180,13 @@ app.post('/mkdir', (req, res) => {
         return res.status(400).json({ error: "Nice try lil bro" });
     }
     const absPath = path.join(BasefolderPath, relPath);
-    const uniqueName = getUniqueFilename(absPath,name);
-    const fullPath = path.join(absPath,uniqueName);
-
+    const uniqueName = getUniqueFilename(absPath, name);
+    const fullPath = path.join(absPath, uniqueName);
+    // try {
+    //     console.log(relPath,fullPath, absPath, uniqueName);
+    // } catch (error) {
+    //     console.log(error.message)
+    // }
     fs.mkdir(fullPath, { recursive: false }, (err) => {
         if (err) return res.status(500).json({
             error: "Failed to create folder"
@@ -193,7 +201,7 @@ app.post('/rename', (req, res) => {
         return res.status(400).json({ error: "Invalid name" });
     }
     const absPath = path.join(BasefolderPath, relPath);
-    const uniqueName = getUniqueFilename(absPath,newName);
+    const uniqueName = getUniqueFilename(absPath, newName);
     const absOld = path.join(BasefolderPath, relPath || "", oldName);
     const absNew = path.join(BasefolderPath, relPath || "", uniqueName);
     fs.rename(absOld, absNew, (err) => {
@@ -203,9 +211,9 @@ app.post('/rename', (req, res) => {
 })
 
 app.get('/can-upload', async (req, res) => {
-  const size = parseInt(req.query.size);
-  if (!size) return res.status(400).json({ error: "Missing size" });
+    const size = parseInt(req.query.size);
+    if (!size) return res.status(400).json({ error: "Missing size" });
 
-  const can = await canUpload(size);
-  res.json({ ok: can });
+    const can = await canUpload(size);
+    res.json({ ok: can });
 });

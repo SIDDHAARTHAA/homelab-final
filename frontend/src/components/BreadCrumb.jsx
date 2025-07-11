@@ -1,51 +1,47 @@
 import * as React from 'react';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import Typography from '@mui/material/Typography';
+import usePathStore from '../store/usePathStore.js';
 
 export default function CondensedWithMenu() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
+  const relPath = usePathStore(state => state.relPath);
+  const setRelPath = usePathStore(state => state.setRelPath);
 
-  const handleClick = (event) => {
-    if (event) {
-      setAnchorEl(event.currentTarget);
-    }
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const segments = relPath ? relPath.split('/') : [];
+  const crumbs = [{ name: "root", path: "" }, ...segments.map((name, idx) => ({
+    name,
+    path: segments.slice(0, idx + 1).join('/'),
+  }))];
 
   return (
-    <React.Fragment>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="with-menu-demo-breadcrumbs"
-      >
-        <MenuItem onClick={handleClose}>Breadcrumb 2</MenuItem>
-        <MenuItem onClick={handleClose}>Breadcrumb 3</MenuItem>
-        <MenuItem onClick={handleClose}>Breadcrumb 4</MenuItem>
-      </Menu>
-      <Breadcrumbs aria-label="breadcrumbs">
-        <Link color="primary" href="#condensed-with-menu">
-          Breadcrumb 1
-        </Link>
-        <IconButton color="primary" size="small" onClick={handleClick}>
-          <MoreHorizIcon />
-        </IconButton>
-        <Link color="primary" href="#condensed-with-menu">
-          Breadcrumb 5
-        </Link>
-        <Link color="primary" href="#condensed-with-menu">
-          Breadcrumb 6
-        </Link>
-      </Breadcrumbs>
-    </React.Fragment>
+    <Breadcrumbs
+      aria-label="breadcrumb"
+      sx={{
+        mb: 2,
+        fontSize: '1.1rem',
+        '& .MuiBreadcrumbs-separator': { mx: 1 },
+      }}
+      separator="›"
+    >
+      {crumbs.map((crumb, idx) =>
+        idx === crumbs.length - 1 ? (
+          <Typography key={idx} color="text.primary" fontWeight={600}>
+            {crumb.name || "root"}
+          </Typography>
+        ) : (
+          <Link
+            key={idx}
+            component="button"
+            color="inherit"
+            underline="hover"
+            onClick={() => setRelPath(crumb.path)}
+            sx={{ cursor: "pointer", fontWeight: 500 }}
+          >
+            {crumb.name || "root"}
+          </Link>
+        )
+      )}
+    </Breadcrumbs>
   );
 }
