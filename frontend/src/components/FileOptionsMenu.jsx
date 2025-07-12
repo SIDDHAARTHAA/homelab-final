@@ -32,7 +32,9 @@ export default function FileOptionsMenu({ anchorEl, open, onClose, onDownload, f
       </MenuItem>
       <Divider />
       <MenuItem onClick={() => {
-        onDelete();
+        if (window.confirm('Are you sure you want to delete this file?')) {
+          onDelete();
+        }
         onClose();
       }} sx={{ color: 'red' }}>
         <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
