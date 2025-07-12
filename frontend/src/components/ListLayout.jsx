@@ -17,6 +17,7 @@ import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import { useTheme } from '@mui/material/styles';
 import FileOptionsMenu from './FileOptionsMenu';
 import axios from 'axios';
+import { downloadFiles } from '../lib/api.js';
 
 // Helper to get file extension
 function getExtension(name) {
@@ -65,6 +66,14 @@ export default function FileTable({ refreshKey }) {
     setMenuIndex(null);
     setSortAnchor(null);
   };
+
+  async function handleDownload(file) {
+    try {
+      await downloadFiles(relPath, file);
+    } catch (error) {
+      console.log("Download error", error)
+    }
+  }
 
   // Icon logic
   function getIcon(file) {
@@ -147,6 +156,7 @@ export default function FileTable({ refreshKey }) {
                     anchorEl={anchorEl}
                     open={openMenu}
                     onClose={handleClose}
+                    onDownload={() => handleDownload(file)}
                   />
                 )}
               </TableCell>

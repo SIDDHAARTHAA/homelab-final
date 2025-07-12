@@ -4,7 +4,7 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function FileOptionsMenu({ anchorEl, open, onClose }) {
+export default function FileOptionsMenu({ anchorEl, open, onClose, onDownload }) {
   return (
     <Menu
       anchorEl={anchorEl}
@@ -13,7 +13,10 @@ export default function FileOptionsMenu({ anchorEl, open, onClose }) {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
     >
-      <MenuItem onClick={onClose}>
+      <MenuItem onClick={() => {
+        onDownload();
+        onClose();
+      }}>
         <DownloadIcon fontSize="small" sx={{ mr: 1 }} />
         Download
       </MenuItem>

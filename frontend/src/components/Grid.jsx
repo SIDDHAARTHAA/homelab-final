@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import FileOptionsMenu from './FileOptionsMenu';
 import Tooltip from '@mui/material/Tooltip';
 import usePathStore from '../store/usePathStore.js';
+import { downloadFiles } from '../lib/api.js';
 
 // Helper to get file extension
 function getExtension(name) {
@@ -40,6 +41,13 @@ export default function Grid({ file }) {
     setAnchorEl(null);
   };
 
+  async function handleDownload(file) {
+    try {
+      await downloadFiles(relPath, file);
+    } catch (error) {
+      console.log("Download error", error)
+    }
+  }
   const fileType = getFileType(file);
 
   // Thumbnail for images/videos
@@ -134,7 +142,7 @@ export default function Grid({ file }) {
 
 
 
-      <FileOptionsMenu anchorEl={anchorEl} open={openMenu} onClose={handleClose} />
+      <FileOptionsMenu anchorEl={anchorEl} open={openMenu} onClose={handleClose} onDownload={() => handleDownload(file)} />
     </div>
   );
 }

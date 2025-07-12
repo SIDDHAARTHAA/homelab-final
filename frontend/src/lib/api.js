@@ -26,7 +26,8 @@ export async function uploadFiles(relPath, files) {
 }
 
 export async function downloadFiles(relPath, filename) {
-    const url = `${API_URL}/download/${encodeURIComponent(filename)}?path=${encodeURIComponent(relPath)}`;
+    console.log(filename)
+    const url = `${API_URL}/download/${encodeURIComponent(filename.name)}?path=${encodeURIComponent(relPath)}`;
 
     try {
         const response = await axios.get(url, {
@@ -36,7 +37,7 @@ export async function downloadFiles(relPath, filename) {
         const blob = new Blob([response.data]);
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = filename;
+        link.download = filename.name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
