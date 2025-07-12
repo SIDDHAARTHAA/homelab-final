@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import FileOptionsMenu from './FileOptionsMenu';
 import Tooltip from '@mui/material/Tooltip';
 import usePathStore from '../store/usePathStore.js';
-import { deleteFile, downloadFiles } from '../lib/api.js';
+import { deleteFile, downloadFiles, renameFile } from '../lib/api.js';
 
 // Helper to get file extension
 function getExtension(name) {
@@ -46,6 +46,15 @@ export default function Grid({ file, triggerRefresh }) {
       await downloadFiles(relPath, file);
     } catch (error) {
       console.log("Download error", error);
+    }
+  }
+
+  const handleRename = async (newName) => {
+    try {
+      await renameFile(relPath, file.name, newName);
+      triggerRefresh && triggerRefresh();
+    } catch (error) {
+      console.log("Rename error", error);
     }
   }
 
@@ -148,6 +157,7 @@ export default function Grid({ file, triggerRefresh }) {
         onDownload={() => handleDownload(file)}
         file={file}
         onDelete={() => handleDelete(file)}
+        onRename={handleRename}
       />
     </div>
   );

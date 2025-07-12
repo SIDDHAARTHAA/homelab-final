@@ -9,6 +9,7 @@ import upload from './utils/multer.js'
 import { fileURLToPath } from 'url';
 import { getUsedStorage, canUpload, updateUsedStorage, rebuildStorageUsed } from './utils/storageManager.js';
 import getUniqueFilename from './utils/getUniqueFileName.js';
+import getFolderSize from './utils/getFolderSize.js';
 dotenv.config();
 
 
@@ -216,4 +217,34 @@ app.get('/can-upload', async (req, res) => {
 
     const can = await canUpload(size);
     res.json({ ok: can });
+});
+
+app.get('/info/:filename', async (req, res) => {
+    try {
+        const filename = req.params.filename;
+        const relPath = req.query.path || "";
+        const absPath = path.join(BasefolderPath, relPath, filename);
+        
+        if (!fs.existsSync(absPath)) {
+            return res.status(404).json({ error: "File not found" });
+        }
+        
+        const stats = await fsp.stat(absPath);
+        let size = stats.size;
+        
+        if (stats.isDirectory()) {
+            size = await getFolderSize(absPath);
+        }
+        
+        res.json({
+            name: filename,
+            type: stats.isDirectory() ? "folder" : "file",
+            size: size,
+            modifiedAt: stats.mtimeMs,
+            created: stats.birthtimeMs
+        });
+    } catch (error) {
+        console.error('Info error:', error);
+        res.status(500).json({ error: "Failed to get file info" });
+    }
 });

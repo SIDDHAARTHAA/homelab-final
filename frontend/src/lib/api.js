@@ -60,3 +60,14 @@ export async function deleteFile(relPath, file) {
     }
 }
 
+export async function renameFile(relPath, oldName, newName) {
+    const res = await axios.post(`${API_URL}/rename`, { relPath, oldName, newName });
+    return res.data;
+}
+
+export async function getFileInfo(relPath, filename) {
+    const url = `${API_URL}/info/${encodeURIComponent(filename)}?path=${encodeURIComponent(relPath)}`;
+    const res = await axios.get(url);
+    return res.data;
+}
+

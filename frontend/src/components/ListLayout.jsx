@@ -17,7 +17,7 @@ import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import { useTheme } from '@mui/material/styles';
 import FileOptionsMenu from './FileOptionsMenu';
 import axios from 'axios';
-import { deleteFile, downloadFiles } from '../lib/api.js';
+import { deleteFile, downloadFiles, renameFile, getFileInfo } from '../lib/api.js';
 import useSortStore from '../store/sortStore.js'
 // Helper to get file extension
 function getExtension(name) {
@@ -40,6 +40,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
   const [menuIndex, setMenuIndex] = React.useState(null);
   const [sortAnchor, setSortAnchor] = React.useState(null);
   const [files, setFiles] = React.useState([]);
+  const [fileSizes, setFileSizes] = React.useState({});
   const relPath = usePathStore(state => state.relPath);
   const setRelPath = usePathStore(state => state.setRelPath);
 
@@ -55,6 +56,28 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
       .then(setFiles)
       .catch(err => console.error("Failed to fetch list:", err));
   }, [refreshKey, relPath, sort]);
+
+  // Load folder sizes
+  React.useEffect(() => {
+    const loadFolderSizes = async () => {
+      const sizes = {};
+      for (const file of files) {
+        if (file.type === "folder") {
+          try {
+            const info = await getFileInfo(relPath, file.name);
+            sizes[file.name] = info.size;
+          } catch (error) {
+            console.log("Error loading folder size:", error);
+          }
+        }
+      }
+      setFileSizes(sizes);
+    };
+    
+    if (files.length > 0) {
+      loadFolderSizes();
+    }
+  }, [files, relPath]);
 
   const handleMenuClick = (e, index) => {
     setAnchorEl(e.currentTarget);
@@ -92,6 +115,15 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
     }
   };
 
+  const handleRename = async (file, newName) => {
+    try {
+      await renameFile(relPath, file.name, newName);
+      triggerRefresh && triggerRefresh();
+    } catch (error) {
+      console.log("Rename error", error);
+    }
+  }
+
   // Icon logic
   function getIcon(file) {
     const type = getFileType(file);
@@ -109,7 +141,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
           <TableRow>
             <TableCell><b>Name</b></TableCell>
             {!isMobile && <TableCell><b>Date Modified</b></TableCell>}
-            <TableCell><b>File Size</b></TableCell>
+            <TableCell><b>Size</b></TableCell>
             <TableCell align="right">
               <IconButton onClick={handleSortClick}>
                 <SortIcon fontSize="small" />
@@ -165,7 +197,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                 )}
 
                 <TableCell>
-                  {isFolder ? "-" : formatSize(file.size)}
+                  {isFolder ? (fileSizes[file.name] ? formatSize(fileSizes[file.name]) : "Loading...") : formatSize(file.size)}
                 </TableCell>
 
                 <TableCell align="right">
@@ -186,6 +218,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                       onDownload={() => handleDownload(file)}
                       file={file}
                       onDelete={() => handleDelete(file)}
+                      onRename={(newName) => handleRename(file, newName)}
                     />
                   )}
                 </TableCell>
