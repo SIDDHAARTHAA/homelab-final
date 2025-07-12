@@ -139,10 +139,10 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell><b>Name</b></TableCell>
-            {!isMobile && <TableCell><b>Date Modified</b></TableCell>}
-            <TableCell><b>Size</b></TableCell>
-            <TableCell align="right">
+            <TableCell className="font-bold font-sans text-gray-900 text-base">Name</TableCell>
+            {!isMobile && <TableCell className="font-bold font-sans text-gray-900 text-base">Date Modified</TableCell>}
+            <TableCell className="font-bold font-sans text-gray-900 text-base">Size</TableCell>
+            <TableCell align="right" className="font-bold font-sans text-gray-900 text-base">
               <IconButton onClick={handleSortClick}>
                 <SortIcon fontSize="small" />
                 <ArrowDropDownIcon />
@@ -158,10 +158,6 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                 <MenuItem onClick={handleSort}>Name</MenuItem>
                 <MenuItem onClick={handleSort}>Date modified</MenuItem>
                 <MenuItem onClick={handleSort}>Size</MenuItem>
-                {/* <Divider />
-                <MenuItem disabled>Sort direction</MenuItem>
-                <MenuItem onClick={handleSort}>A to Z</MenuItem>
-                <MenuItem onClick={handleSort}>Z to A</MenuItem> */}
               </Menu>
             </TableCell>
           </TableRow>
@@ -176,6 +172,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                 key={index}
                 hover
                 style={{ cursor: isFolder ? "pointer" : "default" }}
+                className="font-sans text-gray-900 font-medium text-sm"
               >
                 <TableCell
                   onClick={() => {
@@ -183,6 +180,7 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                       setRelPath(relPath ? `${relPath}/${file.name}` : file.name);
                     }
                   }}
+                  className="font-sans text-gray-900 font-medium text-sm"
                 >
                   <div className="flex items-center gap-2">
                     {getIcon(file)}
@@ -191,16 +189,16 @@ export default function FileTable({ refreshKey, triggerRefresh }) {
                 </TableCell>
 
                 {!isMobile && (
-                  <TableCell>
+                  <TableCell className="font-sans text-gray-900 font-medium text-sm">
                     {new Date(file.modifiedAt).toLocaleDateString()}
                   </TableCell>
                 )}
 
-                <TableCell>
+                <TableCell className="font-sans text-gray-900 font-medium text-sm">
                   {isFolder ? (fileSizes[file.name] ? formatSize(fileSizes[file.name]) : "Loading...") : formatSize(file.size)}
                 </TableCell>
 
-                <TableCell align="right">
+                <TableCell align="right" className="font-sans text-gray-900 font-medium text-sm">
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation(); // 👈 prevent row click

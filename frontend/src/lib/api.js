@@ -71,3 +71,8 @@ export async function getFileInfo(relPath, filename) {
     return res.data;
 }
 
+export async function getStorageInfo() {
+    const res = await axios.get(`${API_URL}/storage`);
+    return res.data;
+}
+

@@ -13,8 +13,8 @@ function LandingPage() {
     const triggerRefresh = () => setRefreshKey(k => k + 1);  
 
     return (
-        <div className="flex justify-center  w-full sm:w-3/4 mx-auto border p-4 flex-col gap-y-5">
-            <TopBar onUpload={triggerRefresh} />
+        <div className="flex justify-center w-full sm:w-3/4 mx-auto p-4 flex-col gap-y-5">
+            <TopBar onUpload={triggerRefresh} refreshKey={refreshKey} />
             <CondensedWithMenu />
             <CreateNewFolder viewMode={viewMode} setViewMode={setViewMode} onFolderCreated={triggerRefresh} />
             {viewMode == "list"

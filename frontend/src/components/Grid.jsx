@@ -127,14 +127,14 @@ export default function Grid({ file, triggerRefresh }) {
 
   return (
     <div
-      className="bg-[#f1f4f8] w-52 rounded-xl p-2 shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col"
+      className="bg-[#f1f4f8] w-52 rounded-xl p-2 shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col font-sans text-gray-900 font-medium"
       style={{ height: 220, padding: 8 }}
     >
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2 overflow-hidden w-40">
           {smallIcon}
           <Tooltip title={file.name} arrow>
-            <span className="text-sm font-medium text-[#1e1e1f] truncate max-w-[8.5rem]">{file.name}</span>
+            <span className="text-sm font-medium text-gray-900 truncate max-w-[8.5rem] font-sans">{file.name}</span>
           </Tooltip>
         </div>
         <IconButton onClick={handleMenuClick} size="small" className="p-1">
