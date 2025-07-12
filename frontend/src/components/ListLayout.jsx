@@ -17,8 +17,8 @@ import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import { useTheme } from '@mui/material/styles';
 import FileOptionsMenu from './FileOptionsMenu';
 import axios from 'axios';
-import { downloadFiles } from '../lib/api.js';
-
+import { deleteFile, downloadFiles } from '../lib/api.js';
+import useSortStore from '../store/sortStore.js'
 // Helper to get file extension
 function getExtension(name) {
   return name.split('.').pop().toLowerCase();
@@ -35,7 +35,7 @@ function getFileType(file) {
   return "other";
 }
 
-export default function FileTable({ refreshKey }) {
+export default function FileTable({ refreshKey, triggerRefresh }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [menuIndex, setMenuIndex] = React.useState(null);
   const [sortAnchor, setSortAnchor] = React.useState(null);
@@ -49,11 +49,12 @@ export default function FileTable({ refreshKey }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const sort = useSortStore(state => state.sort);
   React.useEffect(() => {
-    listFiles(relPath)
+    listFiles(relPath, sort)
       .then(setFiles)
       .catch(err => console.error("Failed to fetch list:", err));
-  }, [refreshKey, relPath]);
+  }, [refreshKey, relPath, sort]);
 
   const handleMenuClick = (e, index) => {
     setAnchorEl(e.currentTarget);
@@ -66,6 +67,14 @@ export default function FileTable({ refreshKey }) {
     setMenuIndex(null);
     setSortAnchor(null);
   };
+  const setSort = useSortStore(state => state.setSort);
+  const handleSort = (e) => {
+    const selected = e.target.textContent?.toLowerCase();
+    if (selected.includes("name")) setSort("name");
+    else if (selected.includes("date")) setSort("modified");
+    else if (selected.includes("size")) setSort("size");
+    handleClose();
+  };
 
   async function handleDownload(file) {
     try {
@@ -74,6 +83,14 @@ export default function FileTable({ refreshKey }) {
       console.log("Download error", error)
     }
   }
+  const handleDelete = async (file) => {
+    try {
+      await deleteFile(relPath, file);
+      triggerRefresh && triggerRefresh();
+    } catch (error) {
+      console.log("Error while deleting", error);
+    }
+  };
 
   // Icon logic
   function getIcon(file) {
@@ -106,13 +123,13 @@ export default function FileTable({ refreshKey }) {
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               >
                 <MenuItem disabled>Sort by</MenuItem>
-                <MenuItem onClick={handleClose}>Name</MenuItem>
-                <MenuItem onClick={handleClose}>Date modified</MenuItem>
-                <MenuItem onClick={handleClose}>Size</MenuItem>
-                <Divider />
+                <MenuItem onClick={handleSort}>Name</MenuItem>
+                <MenuItem onClick={handleSort}>Date modified</MenuItem>
+                <MenuItem onClick={handleSort}>Size</MenuItem>
+                {/* <Divider />
                 <MenuItem disabled>Sort direction</MenuItem>
-                <MenuItem onClick={handleClose}>A to Z</MenuItem>
-                <MenuItem onClick={handleClose}>Z to A</MenuItem>
+                <MenuItem onClick={handleSort}>A to Z</MenuItem>
+                <MenuItem onClick={handleSort}>Z to A</MenuItem> */}
               </Menu>
             </TableCell>
           </TableRow>
@@ -168,6 +185,7 @@ export default function FileTable({ refreshKey }) {
                       onClose={handleClose}
                       onDownload={() => handleDownload(file)}
                       file={file}
+                      onDelete={() => handleDelete(file)}
                     />
                   )}
                 </TableCell>

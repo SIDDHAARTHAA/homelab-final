@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import FileOptionsMenu from './FileOptionsMenu';
 import Tooltip from '@mui/material/Tooltip';
 import usePathStore from '../store/usePathStore.js';
-import { downloadFiles } from '../lib/api.js';
+import { deleteFile, downloadFiles } from '../lib/api.js';
 
 // Helper to get file extension
 function getExtension(name) {
@@ -26,7 +26,7 @@ function getFileType(file) {
   return "other";
 }
 
-export default function Grid({ file }) {
+export default function Grid({ file, triggerRefresh }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const setRelPath = usePathStore(state => state.setRelPath);
@@ -55,6 +55,14 @@ export default function Grid({ file }) {
     }
   };
 
+  const handleDelete = async (file) => {
+    try {
+      await deleteFile(relPath, file);
+      triggerRefresh && triggerRefresh();
+    } catch (error) {
+      console.log("Error while deleting", error);
+    }
+  }
   const fileType = getFileType(file);
 
   let preview = null;
@@ -126,7 +134,7 @@ export default function Grid({ file }) {
       </div>
 
       <div
-        className="bg-white rounded-lg flex justify-center items-center w-full overflow-hidden mt-2 grow"
+        className="bg-white rounded-lg flex justify-center items-center w-full overflow-hidden mt-2 grow hover:cursor-pointer"
         style={{ minHeight: 0 }}
         onClick={handleCardClick} // 👈 move click handler here ONLY
       >
@@ -139,6 +147,7 @@ export default function Grid({ file }) {
         onClose={handleClose}
         onDownload={() => handleDownload(file)}
         file={file}
+        onDelete={() => handleDelete(file)}
       />
     </div>
   );

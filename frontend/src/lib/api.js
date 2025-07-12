@@ -2,11 +2,11 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function listFiles(relPath) {
-    const res = await axios.get(`${API_URL}/list?path=${encodeURIComponent(relPath)}`);
-    console.log(relPath);
+export async function listFiles(relPath, sort = "") {
+    const res = await axios.get(`${API_URL}/list?path=${encodeURIComponent(relPath)}&sortBy=${sort}`);
     return res.data;
 }
+
 
 export async function createFolder(relPath, name) {
     const res = await axios.post(`${API_URL}/mkdir`, { relPath, name });
@@ -45,6 +45,17 @@ export async function downloadFiles(relPath, file) {
         URL.revokeObjectURL(downloadUrl);
     } catch (error) {
         console.error("Download failed:", error);
+        throw error;
+    }
+}
+
+export async function deleteFile(relPath, file) {
+    const url = `${API_URL}/delete/${encodeURIComponent(file.name)}?path=${encodeURIComponent(relPath)}`;
+
+    try {
+        const response = await axios.delete(url);
+    } catch (error) {
+        console.error("Delete Error", error);
         throw error;
     }
 }
