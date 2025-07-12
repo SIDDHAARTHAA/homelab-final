@@ -4,7 +4,9 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function FileOptionsMenu({ anchorEl, open, onClose, onDownload }) {
+export default function FileOptionsMenu({ anchorEl, open, onClose, onDownload, file }) {
+  // console.log(file);
+  console.log(anchorEl)
   return (
     <Menu
       anchorEl={anchorEl}
@@ -26,7 +28,7 @@ export default function FileOptionsMenu({ anchorEl, open, onClose, onDownload })
       </MenuItem>
       <MenuItem onClick={onClose}>
         <InfoIcon fontSize="small" sx={{ mr: 1 }} />
-        Folder Information
+        {file?.type == "file" ? "File information" : "Folder information"}
       </MenuItem>
       <Divider />
       <MenuItem onClick={onClose} sx={{ color: 'red' }}>

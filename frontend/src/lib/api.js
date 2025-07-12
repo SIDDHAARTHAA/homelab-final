@@ -25,9 +25,8 @@ export async function uploadFiles(relPath, files) {
     return res.data;
 }
 
-export async function downloadFiles(relPath, filename) {
-    console.log(filename)
-    const url = `${API_URL}/download/${encodeURIComponent(filename.name)}?path=${encodeURIComponent(relPath)}`;
+export async function downloadFiles(relPath, file) {
+    const url = `${API_URL}/download/${encodeURIComponent(file.name)}?path=${encodeURIComponent(relPath)}`;
 
     try {
         const response = await axios.get(url, {
@@ -35,14 +34,18 @@ export async function downloadFiles(relPath, filename) {
         });
 
         const blob = new Blob([response.data]);
+        const downloadUrl = URL.createObjectURL(blob);
+
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename.name;
-        document.body.appendChild(link);
+        link.href = downloadUrl;
+        link.download = file.type === "folder" ? `${file.name}.zip` : file.name;
         link.click();
-        document.body.removeChild(link);
+
+        // Clean up
+        URL.revokeObjectURL(downloadUrl);
     } catch (error) {
         console.error("Download failed:", error);
         throw error;
     }
 }
+

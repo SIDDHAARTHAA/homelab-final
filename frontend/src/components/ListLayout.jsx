@@ -119,49 +119,61 @@ export default function FileTable({ refreshKey }) {
         </TableHead>
 
         <TableBody>
-          {files.map((file, index) => (
-            <TableRow
-              key={index}
-              hover
-              style={{ cursor: file.type === "folder" ? "pointer" : "default" }}
-              onClick={() => {
-                if (file.type === "folder") {
-                  setRelPath(relPath ? `${relPath}/${file.name}` : file.name);
-                }
-              }}
-            >
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  {getIcon(file)}
-                  <span>{file.name}</span>
-                </div>
-              </TableCell>
+          {files.map((file, index) => {
+            const isFolder = file.type === "folder";
 
-              {!isMobile && (
-                <TableCell>
-                  {new Date(file.modifiedAt).toLocaleDateString()}
+            return (
+              <TableRow
+                key={index}
+                hover
+                style={{ cursor: isFolder ? "pointer" : "default" }}
+              >
+                <TableCell
+                  onClick={() => {
+                    if (isFolder) {
+                      setRelPath(relPath ? `${relPath}/${file.name}` : file.name);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    {getIcon(file)}
+                    <span>{file.name}</span>
+                  </div>
                 </TableCell>
-              )}
 
-              <TableCell>
-                {file.type === "folder" ? "-" : formatSize(file.size)}
-              </TableCell>
-
-              <TableCell align="right">
-                <IconButton onClick={(e) => handleMenuClick(e, index)}>
-                  <MoreVertIcon />
-                </IconButton>
-                {menuIndex === index && (
-                  <FileOptionsMenu
-                    anchorEl={anchorEl}
-                    open={openMenu}
-                    onClose={handleClose}
-                    onDownload={() => handleDownload(file)}
-                  />
+                {!isMobile && (
+                  <TableCell>
+                    {new Date(file.modifiedAt).toLocaleDateString()}
+                  </TableCell>
                 )}
-              </TableCell>
-            </TableRow>
-          ))}
+
+                <TableCell>
+                  {isFolder ? "-" : formatSize(file.size)}
+                </TableCell>
+
+                <TableCell align="right">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation(); // 👈 prevent row click
+                      handleMenuClick(e, index);
+                    }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+
+                  {menuIndex === index && anchorEl && (
+                    <FileOptionsMenu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleClose}
+                      onDownload={() => handleDownload(file)}
+                      file={file}
+                    />
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
