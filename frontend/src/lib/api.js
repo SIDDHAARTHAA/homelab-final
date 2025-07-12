@@ -24,3 +24,24 @@ export async function uploadFiles(relPath, files) {
     });
     return res.data;
 }
+
+export async function downloadFiles(relPath, filename) {
+    const url = `${API_URL}/download/${encodeURIComponent(filename)}?path=${encodeURIComponent(relPath)}`;
+
+    try {
+        const response = await axios.get(url, {
+            responseType: 'blob',
+        });
+
+        const blob = new Blob([response.data]);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error("Download failed:", error);
+        throw error;
+    }
+}
