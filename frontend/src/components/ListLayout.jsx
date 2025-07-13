@@ -35,7 +35,7 @@ function getFileType(file) {
   return "other";
 }
 
-export default function FileTable({ refreshKey, triggerRefresh }) {
+export default function ListLayout({ refreshKey, triggerRefresh }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [menuIndex, setMenuIndex] = React.useState(null);
   const [sortAnchor, setSortAnchor] = React.useState(null);

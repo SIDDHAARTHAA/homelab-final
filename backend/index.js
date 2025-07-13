@@ -223,7 +223,7 @@ app.get('/info/:filename', async (req, res) => {
     try {
         const filename = req.params.filename;
         const relPath = req.query.path || "";
-        const absPath = path.join(BasefolderPath, relPath, filename);
+        const absPath = relPath ? path.join(BasefolderPath, relPath) : path.join(BasefolderPath, filename);
         
         if (!fs.existsSync(absPath)) {
             return res.status(404).json({ error: "File not found" });

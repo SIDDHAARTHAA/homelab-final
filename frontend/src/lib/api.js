@@ -65,11 +65,12 @@ export async function renameFile(relPath, oldName, newName) {
     return res.data;
 }
 
-export async function getFileInfo(relPath, filename) {
-    const url = `${API_URL}/info/${encodeURIComponent(filename)}?path=${encodeURIComponent(relPath)}`;
+export async function getFileInfo(fullPath) {
+    const url = `${API_URL}/info?path=${encodeURIComponent(fullPath)}`;
     const res = await axios.get(url);
     return res.data;
 }
+
 
 export async function getStorageInfo() {
     const res = await axios.get(`${API_URL}/storage`);
